@@ -1,5 +1,5 @@
 # Stop-Super-Speeders-Hackathon
-building a public transportation alert system for New York State and city DMVs to alert super speeders
+building a public transportation alert and warning system for New York State and city DMVs to alert super speeders violations.
 
 
 

@@ -9,22 +9,49 @@ building a public transportation alert and warning system for New York State and
 - Review DSSG [Anti-harassment Policy](https://github.com/dssg/hitchhikers-guide/blob/master/sources/dssg-manual/conduct-culture-and-communications/README.md), and [ethical standards](https://dssgfellowship.org/2015/09/18/an-ethical-checklist-for-data-science/)
 - Review Family for Safe Streets Problem Statement: https://www.familiesforsafestreets.org/about
 
+Extra dictionary for local, DMV would notify the owner of the driver, and notify the court
 ## Hacking Deliverables:
-1) Data Management Design:
-- Design ETL and pipeline 
-- Data structure (is it general enough in case the courts have missing variables?)
-- Consider Privacy
-2) Alert system trigger local DMV authorities
-- Alert data management (e.g. handle of duplicate alerts)
-- Accessibility
-3) Data input/upload system for stake-holders (e.g. courts, DMV, etc)
-- Alert management (e.g. which alerts have been sent, a way to mark follow-ups)
-4) Dashboard DMV is end user:
-- Design DMV dashboard - with success metrics, alerts
-- indicates speeders warning system
-- ability to alert to send to people who cross the 10 threshold
+This hackathon can have several scoring categories:
 
-  
+### Part 1: Data Management
+- Data mobilization of the sample data: taking the schemas and turn into the operational system 
+- Data mapping: for county clerk to normalize into the operational schema (columns names mapping, and formating) 
+- Privacy guardrails
+- Data input system for stake-holders (e.g. courts, DMV, etc) (priority)
+
+### Part 2: Super Speeder Monitori Dashboard - refreshes weekly and send out alerts
+
+> Minimum requirements: Generate a list violators breached the criterias:
+> - 16 driver’s license points
+> - 11 times for speeding violations
+
+#### Make Two Aggregated data sets that powers the dashboard with summary statistics: 
+rolling period of 2 year static data - example data structure:
+ 
+> 1) drivers’ table: 
+> - primary key license
+> - Type of violation
+> - how many violations
+> - Violation points
+> - county registered
+> 2) vehicle table: count
+> - primary key
+> - primary key license
+> - number of violations
+> - county where the vehicle is registered
+
+*Alert system Output*:
+- Create the email text to send the list of violators to stakeholders:
+> 1. The violator
+> 2. Vendor 
+> 3. DMV
+
+
+BONUS: 
+- Create files for the offenders (bonus)
+- Generate new insights for DMV officers
+- Deploy as a web app
+
 ## On December 6th, 2025 the Day of Hackathon:
 
 ***

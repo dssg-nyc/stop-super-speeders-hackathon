@@ -1,5 +1,12 @@
 # Stop-Super-Speeders-Hackathon
-building a public transportation alert and warning system for New York State and city DMVs to alert super speeders violations.
+Families for Safe Streets - DSSG NYC: building a public transportation alert and warning system for New York State and city DMVs to alert super speeders violations.
+
+### Background:
+
+Intelligent Speed Assistance (ISA) devices are used to monitor the driving speeds of vehicles they installed. They are commonly referred to as “speed limiters” due to often being used with high-risk drivers.
+
+NYCDOT’s study of drivers concluded that those with 16 or more speed safety camera violations are twice as likely to kill. Bill ([A.2299/S.4045](https://www.nysenate.gov/legislation/bills/2025/S4045/amendment/A)) proposes mandatory installation of ISA devices for drivers accumulating 11 or more points within a 24-month period, or receiving sixteen or more speed-camera tickets within 12 months. Such individuals must install a speed limiter in any vehicle they own or operate for at least 12 months. The Senate version of this bill passed in 2025, but the Assembly needs to approve this in 2026. 
+The goal of this hackathon is to simulate the creation of an end to end data management system for monitoring driver license plates and drivers ids that would trigger the installation of an ISA device. Participants are to create a lightweight, versatile system that can be used to simulate how different NYC counties and agencies could easily run this system themselves.
 
 
 
@@ -8,51 +15,54 @@ building a public transportation alert and warning system for New York State and
 - Join DSSG-NYC [Slack Group](https://join.slack.com/t/nyc-dssg/shared_invite/zt-3fhzyi936-hDjiJn05j9EKY3BH9YjXgQ)
 - Review DSSG [Anti-harassment Policy](https://github.com/dssg/hitchhikers-guide/blob/master/sources/dssg-manual/conduct-culture-and-communications/README.md), and [ethical standards](https://dssgfellowship.org/2015/09/18/an-ethical-checklist-for-data-science/)
 - Review Family for Safe Streets Problem Statement: https://www.familiesforsafestreets.org/about
+- Review [Data Mapping Documentation and Architecture](https://docs.google.com/document/d/17KtxoxqKwIKNLGwd1zQ5g4ZBZgqkQ4PuH2VLyByReq4/edit?usp=sharing)
 
-Extra dictionary for local, DMV would notify the owner of the driver, and notify the court
-## Hacking Deliverables:
-This hackathon can have several scoring categories:
 
-### Part 1: Data Management
-- Data mobilization of the sample data: taking the schemas and turn into the operational system 
-- Data mapping: for county clerk to normalize into the operational schema (columns names mapping, and formating) 
-- Privacy guardrails
-- Data input system for stake-holders (e.g. courts, DMV, etc) (priority)
 
-### Part 2: Super Speeder Monitori Dashboard - refreshes weekly and send out alerts
 
-> Minimum requirements: Generate a list violators breached the criterias:
-> - 16 driver’s license points
-> - 11 times for speeding violations
+## Task
+- Design a working end to end system that can execute the following:
+- Ingest historical data of traffic and speeding tickets
+- Combine updated data with historical data, without duplicates
+- Generate dataset lists of license plates and drivers ids that trigger the ISA threshold
+- Display the results in a dashboard
+- Trigger an email sending list of plates and driver as a CSV
 
-#### Make Two Aggregated data sets that powers the dashboard with summary statistics: 
-rolling period of 2 year static data - example data structure:
- 
-> 1) drivers’ table: 
+## Deliverables
+1. Make two Output Datasets containing:
+   
+ i) drivers’ table: 
 > - primary key license
 > - Type of violation
 > - how many violations
 > - Violation points
 > - county registered
-> 2) vehicle table: count
+
+ ii) vehicle table: count
 > - primary key
 > - primary key license
 > - number of violations
 > - county where the vehicle is registered
-
-*Alert system Output*:
-- Create the email text to send the list of violators to stakeholders:
-> 1. The violator
-> 2. Vendor 
-> 3. DMV
-
-
+- Total # drivers who currently trigger 11+ points in 24 month trailing window
+- Total # plates who currently trigger 16 tickets in 12 month trailing window
+4. Basic visual dashboard to display information and/or export CSV
+5. Email alert system sent to: 1. The violator 2. Vendor 3. DMV
+- Total # plates who, over the previous 12 month trailing window, who have triggered the list in November
+- Total # drivers who, over the previous 24 month trailing window, who have triggered the list in November
+- Warning systems for those that are just below the threshold and about to commit the violation
+- Only send list of plates and drivers that are new and triggered the threshold
+6. Presentation: Audience are technocrats for legislative processes and policy staff members
+  
 BONUS: 
-- Create files for the offenders (bonus)
-- Generate new insights for DMV officers
+- Create small database files for the offenders (bonus)
+- Generate new visualizations and actionable insights for DMV officers
 - Deploy as a web app
 
-## On December 6th, 2025 the Day of Hackathon:
+***
+## How to Set up environment for the Hackathon:
+>
+>
+
 
 ***
 

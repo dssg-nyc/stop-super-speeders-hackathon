@@ -1,0 +1,23 @@
+[project]
+name = "TheOpenDataStack"
+version = "0.1.0"
+description = "Build end to end data products with open source tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb==1.0.0",
+    "polars>=1.8.0",
+    "pyarrow>=17.0.0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "tenacity>=9.0.0",
+    "great-tables>=0.16.1",
+    "sqlglot>=26.30.0",
+    "beautifulsoup4>=4.13.4",
+    "tqdm>=4.67.1",
+    "ipykernel>=7.1.0",
+    "scipy>=1.15.3",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "rich>=14.2.0",
+]

@@ -53,30 +53,30 @@ Commands:
 ```
 
 #### If you get an error:
-- Copy and paste the exact error message into ChatGPT and explain you’re having problems using uv.
-- ChatGPT can help troubleshoot your specific error message.
+- Copy and paste the exact error message into Google Ai Studio and explain you’re having problems using uv.
+- Gemini can help troubleshoot your specific error message.
 
 If uv displays its usage information without an error, congratulations! You’re all set to work with Python in your local environment.
 
 ## 3. Set up your environment
 
-### Set up your venv:
+### 1. Set up your venv:
 ```sh
 uv venv
 ```
 
-### Activate your venv(Linux/MAC):
+### 2a. Activate your venv(Linux/MAC):
 ```sh
-source .venv/bin/ac
+source .venv/bin/activate
 ```
-### Activate your venv(Windows):
+### 2b. Activate your venv(Windows):
 ```sh
 .venv\Scripts\activate
 ```
 
-### Install Libraries:
+### 3. Install Libraries:
 ```sh
-uv venv
+uv sync
 ```
 
 
@@ -85,6 +85,8 @@ uv venv
 ### Using a notebook
 
 - Open the provided notebook(s) under `notebooks/` (e.g. `Hackathon.ipynb`).  
-- Use **DuckDB**  `data/opendata/*.parquet`.  
-- The data urls are publics are open, so feel free to use **Polars**, **Pandas**, or your preferred engine to query instead
-- Develop your analysis, generate figures, and save outputs under `exports/`.
+- In the top right corner, click Select Kernel, and choose this venv
+- Use **DuckDB** to query downloaded and local data with SQL  
+- The data urls are public, so feel free to use **Polars**, **Pandas**, or your preferred engine to query instead of DuckDB
+- Develop your analysis and save outputs under `exports/`
+- Save SQL queries for a SQL analytics pipeline in the .sql folder

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - SAFENY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f7fafc;
+            color: #2d3748;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .header-info {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #A6192E;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #A6192E;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #A6192E;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #ed8936;
+        }
+        
+        .stat-card.success {
+            border-left-color: #48bb78;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .badge-danger {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .badge-warning {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .badge-info {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f7fafc;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        
+        th:hover {
+            background: #edf2f7;
+        }
+        
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.3;
+        }
+        
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+            color: #A6192E;
+        }
+        
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+            color: #A6192E;
+        }
+        
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .driver-link {
+            color: #A6192E;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .driver-link:hover {
+            text-decoration: underline;
+        }
+        
+        .highlight-red {
+            color: #A6192E;
+            font-weight: 700;
+        }
+        
+        .highlight-orange {
+            color: #dd6b20;
+            font-weight: 700;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state-subtext {
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(166, 25, 46, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-link">← Upload Another File</a>
+            <h1>🚔 Analysis Complete</h1>
+            <div class="header-info">
+                File: <strong>{{ file_name }}</strong> ({{ file_type }}) | 
+                Processed: <strong>{{ timestamp }}</strong>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <div class="stat-value">{{ "{:,}".format(new_records) }}</div>
+                <div class="stat-label">New Records Ingested</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-value">{{ summary.super_speeders_count }}</div>
+                <div class="stat-label">Require Speed Limiting NOW</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-value">{{ summary.warning_drivers_count }}</div>
+                <div class="stat-label">Drivers to Watch</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ "{:,}".format(warehouse_stats.total_violations) }}</div>
+                <div class="stat-label">Total Violations in System</div>
+            </div>
+        </div>
+        
+        <!-- Super Speeders Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    🚨 Drivers Who Require Speed Limiting Now
+                    <span class="badge badge-danger">{{ summary.super_speeders_count }} DRIVERS</span>
+                </div>
+            </div>
+            
+            {% if super_speeders|length > 0 %}
+            <div class="table-wrapper">
+                <table id="superSpeedersTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="0" data-type="string">Driver ID</th>
+                            <th class="sortable" data-column="1" data-type="string">License Plate</th>
+                            <th class="sortable" data-column="2" data-type="number">Camera Tickets (12mo)</th>
+                            <th class="sortable" data-column="3" data-type="number">Speed Points (18mo)</th>
+                            <th class="sortable" data-column="4" data-type="date">Last Violation</th>
+                            <th class="sortable" data-column="5" data-type="number">Total Violations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="superSpeedersBody">
+                        {% for driver in super_speeders %}
+                        <tr>
+                            <td>
+                                <a href="/driver/{{ driver.driver_id }}" class="driver-link">
+                                    {{ driver.driver_id }}
+                                </a>
+                            </td>
+                            <td>{{ driver.license_plate or 'N/A' }}</td>
+                            <td>
+                                <span class="{% if driver.camera_tickets_12mo >= summary.camera_threshold %}highlight-red{% endif %}">
+                                    {{ driver.camera_tickets_12mo }}
+                                    {% if driver.camera_tickets_12mo >= summary.camera_threshold %}⚠️{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="{% if driver.speed_points_18mo >= summary.points_threshold %}highlight-red{% endif %}">
+                                    {{ driver.speed_points_18mo }}
+                                    {% if driver.speed_points_18mo >= summary.points_threshold %}⚠️{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ driver.last_violation_date }}</td>
+                            <td>{{ driver.total_violations }}</td>
+                            <td>
+                                <a href="/driver/{{ driver.driver_id }}" class="driver-link">View Details →</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">✅</div>
+                <div class="empty-state-text">No Super Speeders Found</div>
+                <div class="empty-state-subtext">No drivers currently meet the threshold requirements</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Warning Band Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    ⚠️ Drivers to Watch (Warning Band)
+                    <span class="badge badge-warning">{{ summary.warning_drivers_count }} DRIVERS</span>
+                </div>
+            </div>
+            
+            {% if warning_drivers|length > 0 %}
+            <div class="table-wrapper">
+                <table id="warningDriversTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="0" data-type="string">Driver ID</th>
+                            <th class="sortable" data-column="1" data-type="string">License Plate</th>
+                            <th class="sortable" data-column="2" data-type="number">Camera Tickets (12mo)</th>
+                            <th class="sortable" data-column="3" data-type="number">Speed Points (18mo)</th>
+                            <th class="sortable" data-column="4" data-type="date">Last Violation</th>
+                            <th class="sortable" data-column="5" data-type="string">Distance to Threshold</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warningDriversBody">
+                        {% for driver in warning_drivers %}
+                        <tr>
+                            <td>
+                                <a href="/driver/{{ driver.driver_id }}" class="driver-link">
+                                    {{ driver.driver_id }}
+                                </a>
+                            </td>
+                            <td>{{ driver.license_plate or 'N/A' }}</td>
+                            <td>
+                                <span class="highlight-orange">{{ driver.camera_tickets_12mo }}</span>
+                            </td>
+                            <td>
+                                <span class="highlight-orange">{{ driver.speed_points_18mo }}</span>
+                            </td>
+                            <td>{{ driver.last_violation_date }}</td>
+                            <td>
+                                {% if driver.tickets_to_threshold < 900 %}
+                                    {{ driver.tickets_to_threshold }} more tickets
+                                {% elif driver.points_to_threshold < 900 %}
+                                    {{ driver.points_to_threshold }} more points
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/driver/{{ driver.driver_id }}" class="driver-link">View Details →</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👍</div>
+                <div class="empty-state-text">No Drivers in Warning Band</div>
+                <div class="empty-state-subtext">No drivers are currently close to the thresholds</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- System Info -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    📊 System Information
+                    <span class="badge badge-info">WAREHOUSE STATS</span>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ "{:,}".format(warehouse_stats.unique_drivers) }}</div>
+                    <div class="stat-label">Unique Drivers</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ "{:,}".format(warehouse_stats.unique_plates) }}</div>
+                    <div class="stat-label">Unique Plates</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ "{:,}".format(warehouse_stats.camera_violations) }}</div>
+                    <div class="stat-label">Camera Violations</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ "{:,}".format(warehouse_stats.officer_violations) }}</div>
+                    <div class="stat-label">Officer Violations</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                📤 Upload Another File
+            </a>
+        </div>
+    </div>
+    
+    <script>
+    // Table sorting functionality
+    function sortTable(tableId, columnIndex, dataType) {
+        const table = document.getElementById(tableId);
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const headers = table.querySelectorAll('th.sortable');
+        const header = headers[columnIndex];
+        
+        // Determine sort direction
+        let isAsc = true;
+        if (header.classList.contains('sorted-asc')) {
+            isAsc = false;
+        }
+        
+        // Remove all sorted classes
+        headers.forEach(h => {
+            h.classList.remove('sorted-asc', 'sorted-desc');
+        });
+        
+        // Add appropriate class
+        header.classList.add(isAsc ? 'sorted-asc' : 'sorted-desc');
+        
+        // Sort rows
+        rows.sort((a, b) => {
+            let aVal = a.children[columnIndex].textContent.trim();
+            let bVal = b.children[columnIndex].textContent.trim();
+            
+            // Handle N/A values
+            if (aVal === 'N/A') aVal = '';
+            if (bVal === 'N/A') bVal = '';
+            
+            let comparison = 0;
+            
+            if (dataType === 'number') {
+                // Extract numbers, including those with emojis
+                const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, '')) || 0;
+                const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, '')) || 0;
+                comparison = aNum - bNum;
+            } else if (dataType === 'date') {
+                const aDate = new Date(aVal);
+                const bDate = new Date(bVal);
+                comparison = aDate - bDate;
+            } else {
+                // String comparison
+                comparison = aVal.localeCompare(bVal);
+            }
+            
+            return isAsc ? comparison : -comparison;
+        });
+        
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Add click handlers to all sortable headers
+    document.addEventListener('DOMContentLoaded', function() {
+        const tables = ['superSpeedersTable', 'warningDriversTable'];
+        
+        tables.forEach(tableId => {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const headers = table.querySelectorAll('th.sortable');
+            headers.forEach((header, index) => {
+                header.addEventListener('click', function() {
+                    const columnIndex = parseInt(this.dataset.column);
+                    const dataType = this.dataset.type;
+                    sortTable(tableId, columnIndex, dataType);
+                });
+            });
+        });
+    });
+    </script>
+</body>
+</html>

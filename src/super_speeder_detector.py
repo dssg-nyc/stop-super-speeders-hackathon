@@ -254,7 +254,7 @@ class SuperSpeederDetector:
         SELECT 
             COUNT(*) as total_violations,
             COUNT(DISTINCT driver_id) as unique_drivers,
-            0 as unique_plates,
+            COUNT(DISTINCT CASE WHEN data_source = 'SPEED_CAMERA' THEN driver_id END) as unique_plates,
             MIN(violation_date) as earliest_violation,
             MAX(violation_date) as latest_violation,
             COUNT(CASE WHEN data_source = 'SPEED_CAMERA' THEN 1 END) as camera_violations,

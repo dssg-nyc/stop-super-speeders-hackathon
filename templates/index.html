@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAFENY Super Speeder Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 50px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #A6192E;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .upload-form {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #2d3748;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        select:hover {
+            border-color: #A6192E;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #A6192E;
+            box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.1);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            border: 3px dashed #cbd5e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+        
+        .file-input-wrapper:hover {
+            border-color: #A6192E;
+            background: #edf2f7;
+        }
+        
+        .file-input-wrapper.dragover {
+            border-color: #A6192E;
+            background: #e6f2ff;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-input-label {
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #A6192E;
+            margin-bottom: 10px;
+        }
+        
+        .file-input-text {
+            color: #4a5568;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .file-input-hint {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .file-selected {
+            margin-top: 10px;
+            padding: 12px;
+            background: #e6fffa;
+            border: 1px solid #81e6d9;
+            border-radius: 8px;
+            color: #234e52;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .file-selected.show {
+            display: block;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(166, 25, 46, 0.4);
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(166, 25, 46, 0.6);
+        }
+        
+        .submit-button:active {
+            transform: translateY(0);
+        }
+        
+        .submit-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .info-box {
+            background: #edf2f7;
+            border-left: 4px solid #A6192E;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .info-box h3 {
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-box li {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .info-box li:before {
+            content: "•";
+            color: #A6192E;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="badge">🚔 DMV Staff Portal</div>
+            <h1>Super Speeder Detection</h1>
+            <p class="subtitle">
+                Upload traffic violation data to identify drivers who require speed limiting devices
+            </p>
+        </div>
+        
+        <form class="upload-form" method="post" action="/upload" enctype="multipart/form-data" id="uploadForm">
+            <div class="form-group">
+                <label for="file_type">Data Type</label>
+                <select name="file_type" id="file_type" required>
+                    <option value="">Select data type...</option>
+                    <option value="speed_camera">Speed Camera Tickets</option>
+                    <option value="traffic_violations">Traffic Violations (Officer-Issued)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="file">Upload CSV File</label>
+                <div class="file-input-wrapper" id="fileWrapper">
+                    <input type="file" name="file" id="file" accept=".csv" required>
+                    <div class="file-input-label">
+                        <div class="upload-icon">📄</div>
+                        <div class="file-input-text">Click to browse or drag file here</div>
+                        <div class="file-input-hint">CSV files only</div>
+                    </div>
+                </div>
+                <div class="file-selected" id="fileSelected"></div>
+            </div>
+            
+            <button type="submit" class="submit-button" id="submitBtn">
+                🔍 Run Analysis
+            </button>
+        </form>
+        
+        <div class="info-box">
+            <h3>Super Speeder Thresholds</h3>
+            <ul>
+                <li><strong>16+ speed camera tickets</strong> in 12 months</li>
+                <li><strong>11+ speed-related points</strong> in 18 months</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const fileInput = document.getElementById('file');
+        const fileWrapper = document.getElementById('fileWrapper');
+        const fileSelected = document.getElementById('fileSelected');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        
+        // Handle file selection
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2);
+                fileSelected.innerHTML = `✅ Selected: <strong>${fileName}</strong> (${fileSize} MB)`;
+                fileSelected.classList.add('show');
+            }
+        });
+        
+        // Drag and drop
+        fileWrapper.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        fileWrapper.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        fileWrapper.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+        
+        // Handle form submission
+        uploadForm.addEventListener('submit', function(e) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Processing...';
+        });
+    </script>
+</body>
+</html>

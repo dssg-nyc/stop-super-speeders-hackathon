@@ -19,6 +19,15 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
+import os
+import dotenv
+from google import genai
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+dotenv.load_dotenv()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data" / "opendata"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "exports"
@@ -35,17 +44,30 @@ SQL_DRIVERS = SQL_DIR / "find_new_driver_violators.sql"
 # =============================================================================
 # ADD YOUR TEST FILES HERE
 # =============================================================================
-TEST_BATCH = "test1"
+TEST_BATCH = "test2"
 
 CAMERA_FILES = [
-    "test1_nyc_speed_cameras.json",
+    "test2_nyc_speed_cameras.csv",
 ]
 
 VIOLATION_FILES = [
-    "test1_nyc_traffic_violations.json",
+    "test2_nyc_traffic_violations.csv",
 ]
 # =============================================================================
 
+
+# --- LLM Structure Definitions ---
+class DateParsingRule(BaseModel):
+    columns_used: List[str] = Field(description="List of columns needed to construct the date.")
+    join_separator: str = Field(" ", description="Separator to join columns if multiple.")
+    source_strptime_format: str = Field(..., description="Python strptime format matching the source.")
+
+class ColumnPair(BaseModel):
+    historical_column: str = Field(description="Column name from historical data.")
+    new_upload_column: Optional[str] = Field(description="Matching column from new upload. None if no match.")
+
+class MappingResult(BaseModel):
+    mappings: List[ColumnPair] = Field(description="List of mappings for every historical column.")
 
 def load_camera_file(file_path: Path) -> pd.DataFrame:
     """Load a speed camera file and normalize to standard schema."""
@@ -105,6 +127,93 @@ def load_camera_file(file_path: Path) -> pd.DataFrame:
     else:
         raise ValueError(f"Unsupported file type: {ext}")
 
+def smart_load_and_normalize(file_path: Path, historical_df: pd.DataFrame, target_date_col: str) -> pd.DataFrame:
+    """
+    Dynamically loads a file and normalizes it to match the historical_df schema 
+    using LLM inference for column mapping and date parsing.
+    """
+    # 1. Generic File Load
+    ext = file_path.suffix.lower()
+    if ext == '.parquet':
+        df = pd.read_parquet(file_path)
+    elif ext == '.json':
+        df = pd.read_json(file_path, lines=True)
+    elif ext == '.csv':
+        df = pd.read_csv(file_path)
+    else:
+        raise ValueError(f"Unsupported type: {ext}")
+        
+    # If the schema is already identical, skip LLM
+    if set(df.columns) == set(historical_df.columns):
+        return df
+
+    # 2. LLM Column Mapping
+    print(f"    ...Analysing schema for {file_path.name}...")
+    
+    prompt_mapping = f"""
+    Map the columns from the 'New Upload' to the 'Historical Data'.
+    Historical Columns: {list(historical_df.columns)}
+    New Upload Sample: {df.head(3).to_markdown()}
+    
+    Requirements:
+    1. Return a list of mappings.
+    2. Every column from the Historical Data MUST appear in the output.
+    3. If a historical column has no match, value is None.
+    """
+    
+    response_map = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt_mapping,
+        config={"response_mime_type": "application/json", "response_json_schema": MappingResult.model_json_schema()},
+    )
+    mapping_rule = MappingResult.model_validate_json(response_map.text)
+    
+    # Apply Column Renaming
+    rename_dict = {pair.new_upload_column: pair.historical_column 
+                   for pair in mapping_rule.mappings 
+                   if pair.new_upload_column is not None}
+    df = df.rename(columns=rename_dict)
+
+    # 3. LLM Date Parsing (if the target date column is missing or needs standardization)
+    # We only run this if the specific target date column exists in the *mapped* df but might be dirty, 
+    # or if we need to derive it from original columns that weren't mapped yet.
+    
+    # For robustness, we ask the LLM how to construct the specific target date column from the *original* df
+    # logic, then assign it to the standardized name.
+    
+    prompt_date = f"""
+    I need to standardize the date into column '{target_date_col}'.
+    The target format is standard ISO 8601 (YYYY-MM-DD).
+    
+    Data Sample: {df.head(3).to_markdown()}
+    
+    Identify the columns containing date info and define a Python strptime parsing rule.
+    """
+    
+    response_date = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt_date,
+        config={"response_mime_type": "application/json", "response_json_schema": DateParsingRule.model_json_schema()},
+    )
+    date_rule = DateParsingRule.model_validate_json(response_date.text)
+    
+    # Apply Date Transformation
+    def parse_date(row):
+        try:
+            # Note: We use original columns if they exist, otherwise mapped columns
+            values = [str(row[col]) for col in date_rule.columns_used if col in row]
+            if not values: return None
+            raw_string = date_rule.join_separator.join(values)
+            dt = datetime.strptime(raw_string, date_rule.source_strptime_format)
+            return dt.date() # Return python date object
+        except:
+            return None
+
+    df[target_date_col] = df.apply(parse_date, axis=1)
+    
+    # 4. Filter to keep only historical columns
+    final_cols = [c for c in historical_df.columns if c in df.columns]
+    return df[final_cols]
 
 def load_violation_file(file_path: Path) -> pd.DataFrame:
     """Load a traffic violation file and normalize to standard schema."""
@@ -181,27 +290,43 @@ def run_camera_pipeline(test_files: list[Path], output_dir: Path) -> int:
     print("SPEED CAMERA VIOLATORS (16+ tickets in 12 months)")
     print("-"*60)
 
-    # Load historical
+    # 1. Load Historical Data
     print(f"  Historical: {HISTORICAL_CAMERAS.name}")
-    historical_df = load_camera_file(HISTORICAL_CAMERAS)
+    # Load raw to get schema, then normalize strictly
+    hist_raw = pd.read_parquet(HISTORICAL_CAMERAS)
+    historical_df = pd.DataFrame({
+        "issue_date": pd.to_datetime(hist_raw["issue_date"]).dt.date,
+        "plate": hist_raw["plate"].str.upper(),
+        "summons_number": hist_raw["summons_number"].astype("Int64"),
+        "state": hist_raw["state"],
+    })
     print(f"    Loaded {len(historical_df):,} records")
 
-    # Load test files
+    # 2. Load & Normalize Test Files Dynamically
     test_dfs = []
     for f in test_files:
         print(f"  Test file:  {f.name}")
-        df = load_camera_file(f)
-        print(f"    Loaded {len(df):,} records")
-        test_dfs.append(df)
+        try:
+            # LLM magic happens here:
+            df = smart_load_and_normalize(f, historical_df, target_date_col="issue_date")
+            
+            # Final Type Enforcement
+            df["plate"] = df["plate"].str.upper()
+            df["summons_number"] = df["summons_number"].astype("Int64")
+            
+            print(f"    Loaded {len(df):,} normalized records")
+            test_dfs.append(df)
+        except Exception as e:
+            print(f"    [ERROR] Could not process {f.name}: {e}")
 
-    test_df = pd.concat(test_dfs, ignore_index=True) if test_dfs else pd.DataFrame({
-        "issue_date": pd.Series(dtype="object"),
-        "plate": pd.Series(dtype="str"),
-        "summons_number": pd.Series(dtype="Int64"),
-        "state": pd.Series(dtype="str"),
-    })
+    # Handle case with no valid data
+    if not test_dfs:
+        print("    No valid test data found.")
+        test_df = pd.DataFrame(columns=historical_df.columns)
+    else:
+        test_df = pd.concat(test_dfs, ignore_index=True)
 
-    # Execute SQL
+    # 3. Execute SQL Analysis (Unchanged)
     conn = duckdb.connect(':memory:')
     try:
         conn.register("historical_data", historical_df)
@@ -240,31 +365,58 @@ def run_driver_pipeline(test_files: list[Path], output_dir: Path) -> int:
     print("DRIVER VIOLATORS (11+ points in 24 months)")
     print("-"*60)
 
-    # Load historical
+    # 1. Load Historical Data
     print(f"  Historical: {HISTORICAL_VIOLATIONS.name}")
-    historical_df = load_violation_file(HISTORICAL_VIOLATIONS)
+    hist_raw = pd.read_parquet(HISTORICAL_VIOLATIONS)
+    historical_df = pd.DataFrame({
+        "license_id": hist_raw["license_id"],
+        "violation_year": hist_raw["violation_year"].astype("Int64"),
+        "violation_month": hist_raw["violation_month"].astype("Int64"),
+        "violation_code": hist_raw["violation_code"],
+        "points": hist_raw["points"].astype("Int64"),
+        "county": hist_raw["county"],
+    })
     print(f"    Loaded {len(historical_df):,} records")
 
-    # Load test files
+    # 2. Load & Normalize Test Files Dynamically
     test_dfs = []
     for f in test_files:
         print(f"  Test file:  {f.name}")
-        df = load_violation_file(f)
-        # Filter out rows with no license_id
-        valid_df = df[df["license_id"].notna()]
-        print(f"    Loaded {len(valid_df):,} records with valid license_id")
-        test_dfs.append(valid_df)
+        try:
+            # We use a temporary date column to catch any full date strings
+            df = smart_load_and_normalize(f, historical_df, target_date_col="temp_parsed_date")
 
-    test_df = pd.concat(test_dfs, ignore_index=True) if test_dfs else pd.DataFrame({
-        "license_id": pd.Series(dtype="str"),
-        "violation_year": pd.Series(dtype="Int64"),
-        "violation_month": pd.Series(dtype="Int64"),
-        "violation_code": pd.Series(dtype="str"),
-        "points": pd.Series(dtype="Int64"),
-        "county": pd.Series(dtype="str"),
-    })
+            # Post-Processing: Handle Year/Month split if missing
+            if "violation_year" not in df.columns or df["violation_year"].isnull().all():
+                if "temp_parsed_date" in df.columns:
+                    print("    ...Deriving Year/Month from parsed date column...")
+                    df["violation_year"] = pd.to_datetime(df["temp_parsed_date"]).dt.year
+                    df["violation_month"] = pd.to_datetime(df["temp_parsed_date"]).dt.month
+            
+            # Clean up temp column if it exists
+            if "temp_parsed_date" in df.columns:
+                df = df.drop(columns=["temp_parsed_date"])
 
-    # Execute SQL
+            # Filter valid licenses
+            valid_df = df[df["license_id"].notna()].copy()
+            
+            # Final Type Enforcement
+            valid_df["violation_year"] = valid_df["violation_year"].astype("Int64")
+            valid_df["violation_month"] = valid_df["violation_month"].astype("Int64")
+            valid_df["points"] = valid_df["points"].astype("Int64")
+
+            print(f"    Loaded {len(valid_df):,} valid records")
+            test_dfs.append(valid_df)
+        except Exception as e:
+            print(f"    [ERROR] Could not process {f.name}: {e}")
+
+    if not test_dfs:
+        print("    No valid test data found.")
+        test_df = pd.DataFrame(columns=historical_df.columns)
+    else:
+        test_df = pd.concat(test_dfs, ignore_index=True)
+
+    # 3. Execute SQL Analysis (Unchanged)
     conn = duckdb.connect(':memory:')
     try:
         conn.register("historical_data", historical_df)
@@ -290,7 +442,7 @@ def run_driver_pipeline(test_files: list[Path], output_dir: Path) -> int:
             print(f"\n  Top violators:")
             for _, row in result.head(5).iterrows():
                 counties = row.get('counties', 'N/A')
-                print(f"    {row['license_id']}: {row['total_points']} points ({row['violation_count']} violations) - {counties}")
+                print(f"    {row['license_id']}: {row['total_points']} points - {counties}")
 
         return row_count
 

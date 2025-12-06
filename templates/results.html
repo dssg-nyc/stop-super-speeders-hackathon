@@ -354,17 +354,20 @@
         /* Chart Container */
         .chart-container {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
         }
         
         .chart-title {
             font-size: 18px;
             font-weight: 700;
             color: #2d3748;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -378,10 +381,17 @@
         }
         
         .summary-card {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #A6192E;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #A6192E;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(166, 25, 46, 0.15);
         }
         
         .summary-card h3 {
@@ -407,41 +417,52 @@
         }
         
         .bar-chart {
-            margin: 20px 0;
+            margin: 25px 0 5px 0;
         }
         
         .bar-item {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .bar-label {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-size: 14px;
             color: #2d3748;
             font-weight: 600;
         }
         
+        .bar-label span:first-child {
+            color: #4a5568;
+        }
+        
+        .bar-label span:last-child {
+            color: #A6192E;
+            font-weight: 700;
+        }
+        
         .bar-background {
             background: #e2e8f0;
-            height: 30px;
-            border-radius: 5px;
+            height: 36px;
+            border-radius: 8px;
             overflow: hidden;
             position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
         
         .bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #A6192E 0%, #54585A 100%);
-            transition: width 0.8s ease-out;
+            transition: width 1s ease-out;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding-right: 10px;
+            padding-right: 12px;
             color: white;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -641,57 +662,86 @@
                 </div>
                 
                 <!-- Key Metrics Summary -->
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <h3>Detection Rate</h3>
-                        <div class="value">{{ "%.2f"|format((summary.super_speeders_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%</div>
-                        <div class="description">Percentage of drivers requiring speed limiting devices</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <h3>Warning Rate</h3>
-                        <div class="value">{{ "%.2f"|format((summary.warning_drivers_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%</div>
-                        <div class="description">Percentage of drivers in warning band needing monitoring</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <h3>Camera Effectiveness</h3>
-                        <div class="value">{{ "{:,}".format(warehouse_stats.camera_violations) }}</div>
-                        <div class="description">Total violations captured by speed cameras</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <h3>Officer Violations</h3>
-                        <div class="value">{{ "{:,}".format(warehouse_stats.officer_violations) }}</div>
-                        <div class="description">Total violations recorded by officers</div>
+                <div class="chart-container">
+                    <div class="chart-title">🎯 Key Performance Metrics</div>
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <h3>Detection Rate</h3>
+                            <div class="value">{{ "%.2f"|format((summary.super_speeders_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%</div>
+                            <div class="description">Drivers requiring speed limiting devices</div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <h3>Warning Rate</h3>
+                            <div class="value">{{ "%.2f"|format((summary.warning_drivers_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%</div>
+                            <div class="description">Drivers in warning band needing monitoring</div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <h3>Total Drivers</h3>
+                            <div class="value">{{ "{:,}".format(warehouse_stats.unique_drivers) }}</div>
+                            <div class="description">Unique drivers in the system</div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <h3>Total Violations</h3>
+                            <div class="value">{{ "{:,}".format(warehouse_stats.camera_violations + warehouse_stats.officer_violations) }}</div>
+                            <div class="description">All violations recorded to date</div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Violation Distribution Chart -->
-                <div class="chart-container">
-                    <div class="chart-title">📈 Violation Distribution</div>
-                    <div class="bar-chart">
-                        <div class="bar-item">
-                            <div class="bar-label">
-                                <span>Speed Camera Violations</span>
-                                <span>{{ "{:,}".format(warehouse_stats.camera_violations) }}</span>
+                <!-- Charts Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
+                    <!-- Violation Distribution Chart -->
+                    <div class="chart-container">
+                        <div class="chart-title">📈 Violation Sources</div>
+                        <div class="bar-chart">
+                            <div class="bar-item">
+                                <div class="bar-label">
+                                    <span>📸 Speed Cameras</span>
+                                    <span>{{ "{:,}".format(warehouse_stats.camera_violations) }}</span>
+                                </div>
+                                <div class="bar-background">
+                                    <div class="bar-fill" style="width: {{ (warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%">
+                                        {{ "%.1f"|format((warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
+                                    </div>
+                                </div>
                             </div>
-                            <div class="bar-background">
-                                <div class="bar-fill" style="width: {{ (warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%">
-                                    {{ "%.1f"|format((warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
+                            
+                            <div class="bar-item">
+                                <div class="bar-label">
+                                    <span>👮 Officer Citations</span>
+                                    <span>{{ "{:,}".format(warehouse_stats.officer_violations) }}</span>
+                                </div>
+                                <div class="bar-background">
+                                    <div class="bar-fill" style="width: {{ (warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%; background: linear-gradient(90deg, #54585A 0%, #A6192E 100%);">
+                                        {{ "%.1f"|format((warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="bar-item">
-                            <div class="bar-label">
-                                <span>Officer-Issued Violations</span>
-                                <span>{{ "{:,}".format(warehouse_stats.officer_violations) }}</span>
+                    </div>
+                    
+                    <!-- System Stats -->
+                    <div class="chart-container">
+                        <div class="chart-title">🗂️ Database Stats</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="text-align: center; padding: 15px; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ "{:,}".format(warehouse_stats.unique_drivers) }}</div>
+                                <div style="font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Unique Drivers</div>
                             </div>
-                            <div class="bar-background">
-                                <div class="bar-fill" style="width: {{ (warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%">
-                                    {{ "%.1f"|format((warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
-                                </div>
+                            <div style="text-align: center; padding: 15px; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ "{:,}".format(warehouse_stats.unique_plates) }}</div>
+                                <div style="font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Unique Plates</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ "{:,}".format(warehouse_stats.camera_violations) }}</div>
+                                <div style="font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Camera Violations</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #f7fafc; border-radius: 8px;">
+                                <div style="font-size: 28px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ "{:,}".format(warehouse_stats.officer_violations) }}</div>
+                                <div style="font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Officer Violations</div>
                             </div>
                         </div>
                     </div>
@@ -699,7 +749,7 @@
                 
                 <!-- Driver Risk Distribution -->
                 <div class="chart-container">
-                    <div class="chart-title">👥 Driver Risk Distribution</div>
+                    <div class="chart-title">👥 Driver Risk Categories</div>
                     <div class="bar-chart">
                         <div class="bar-item">
                             <div class="bar-label">
@@ -739,43 +789,19 @@
                     </div>
                 </div>
                 
-                <!-- System Information -->
-                <div class="chart-container">
-                    <div class="chart-title">📊 System Information</div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">{{ "{:,}".format(warehouse_stats.unique_drivers) }}</div>
-                            <div class="stat-label">Unique Drivers</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-value">{{ "{:,}".format(warehouse_stats.unique_plates) }}</div>
-                            <div class="stat-label">Unique Plates</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-value">{{ "{:,}".format(warehouse_stats.camera_violations) }}</div>
-                            <div class="stat-label">Camera Violations</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-value">{{ "{:,}".format(warehouse_stats.officer_violations) }}</div>
-                            <div class="stat-label">Officer Violations</div>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Thresholds Info -->
                 <div class="chart-container">
                     <div class="chart-title">⚖️ Legislative Thresholds</div>
-                    <div style="padding: 15px; background: #f7fafc; border-radius: 8px;">
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #A6192E;">Camera Ticket Threshold:</strong>
-                            <span style="color: #2d3748;">{{ summary.camera_threshold }} or more tickets in {{ summary.camera_window_months }} months</span>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="padding: 20px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border-radius: 10px; border-left: 4px solid #A6192E;">
+                            <div style="font-size: 14px; color: #742a2a; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">📸 Camera Tickets</div>
+                            <div style="font-size: 32px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ summary.camera_threshold }}+</div>
+                            <div style="font-size: 13px; color: #742a2a;">Tickets in {{ summary.camera_window_months }} months triggers speed limiting requirement</div>
                         </div>
-                        <div>
-                            <strong style="color: #A6192E;">Speed Points Threshold:</strong>
-                            <span style="color: #2d3748;">{{ summary.points_threshold }} or more points in {{ summary.points_window_months }} months</span>
+                        <div style="padding: 20px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border-radius: 10px; border-left: 4px solid #A6192E;">
+                            <div style="font-size: 14px; color: #742a2a; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">⚡ Speed Points</div>
+                            <div style="font-size: 32px; font-weight: 700; color: #A6192E; margin-bottom: 5px;">{{ summary.points_threshold }}+</div>
+                            <div style="font-size: 13px; color: #742a2a;">Points in {{ summary.points_window_months }} months triggers speed limiting requirement</div>
                         </div>
                     </div>
                 </div>

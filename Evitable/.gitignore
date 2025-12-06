@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# NodeJS
+node_modules/
+npm-debug.log
+.next/
+out/
+build/
+
+# DuckDB / Data
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+# Keep the data folder structure but ignore large files if they were downloaded
+# data/*.parquet
+# data/*.csv
+# data/*.json
+# Actually, for this repo, we might want to track scripts to download data, but maybe not the data itself if it's huge. 
+# However, user mentioned "push it... with complete guide". 
+# The data is downloaded via script.
+# Let's ignore the actual data files to be safe/clean
+data/*.parquet
+data/*.csv
+data/*.json
+# Keep the directory itself
+!data/.gitkeep
+
+# IDE
+.vscode/
+.idea/

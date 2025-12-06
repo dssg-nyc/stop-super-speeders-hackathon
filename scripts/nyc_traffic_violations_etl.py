@@ -87,6 +87,17 @@ if __name__ == "__main__":
     df3.drop_duplicates(inplace=True)
     print(df3.equals(df1))
 
+    speed_violations = {"SPEED IN ZONE 1-10", "SPEED IN ZONE 11-20", "SPEED IN ZONE 21-30", "SPEED IN ZONE 31-40", "SPEED OVER 40"}
+    print(len(df1))
+    df1 = df1[df1['violation_code'].isin(speed_violations)]
     df1['datetime'] = pd.to_datetime(df1['violation_year'].astype(str) + '-' + df1['violation_month'].astype(str) + '-01')
+    print(len(df1))
+    
+    # Filter out data over 18 months older than the max datetime
+    max_datetime = df1['datetime'].max()
+    cutoff_date = max_datetime - pd.DateOffset(months=18)
+    df1 = df1[df1['datetime'] >= cutoff_date]
     df1 = df1.sort_values(by=['license_id', 'datetime']).reset_index(drop=True)
-    print(df1.head(10))
+    df_sum = df1.groupby(['license_id', 'county'], as_index=False).agg({'points': 'sum'}, drop_index=True)
+    df_sum = df_sum[df_sum['points'] >= 11]
+    df_sum.to_csv(Path(__file__).parent.parent / "nyc_speeding_violations_over_18_months.csv", index=False)

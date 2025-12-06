@@ -59,10 +59,57 @@ BONUS:
 - Deploy as a web app
 
 ***
-## How to Set up environment for the Hackathon:
->
->
+## How to Set up environment for the Hackathon
 
+### Prerequisites
+- Python 3.10+
+- [uv](https://docs.astral.sh/uv/) package manager
+
+### Installation
+```bash
+uv sync
+```
+
+## Running the Pipeline
+
+The pipeline identifies **NEW violators** who cross thresholds when test data is added to historical data.
+
+### Thresholds
+- **Speed Cameras (Plates):** 16+ tickets in 12 months
+- **Traffic Violations (Drivers):** 11+ points in 24 months
+
+### Usage
+
+1. Edit `scripts/run_pipeline.py` to specify your test files:
+
+```python
+TEST_BATCH = "test1"
+
+CAMERA_FILES = [
+    "test1_nyc_speed_cameras.json",
+]
+
+VIOLATION_FILES = [
+    "test1_nyc_traffic_violations.json",
+]
+```
+
+2. Run the pipeline:
+```bash
+uv run python scripts/run_pipeline.py
+```
+
+3. Results are exported to `data/exports/{batch}_{timestamp}/`:
+   - `new_plate_violators.csv` - plates crossing 16+ ticket threshold
+   - `new_driver_violators.csv` - drivers crossing 11+ points threshold
+
+### Output Format
+
+Each CSV includes:
+- Violator ID (plate or license_id)
+- Violation count/points
+- Date range of violations
+- Source files used (for traceability)
 
 ***
 

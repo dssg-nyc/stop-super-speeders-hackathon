@@ -1,1 +1,0 @@
-SELECT * from nyc_speed_cameras_historic limit 200

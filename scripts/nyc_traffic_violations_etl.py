@@ -79,10 +79,14 @@ if __name__ == "__main__":
     ]
     # Load all traffic violations data
     df1 = load_all_traffic_violations(traffic_files_1)
-    print(df1.head())
+    df1.drop_duplicates(inplace=True)
     df2 = load_all_traffic_violations(traffic_files_2)
-    print(df2.head())
+    df2.drop_duplicates(inplace=True)
     print(df2.equals(df1))
     df3 = load_all_traffic_violations(traffic_files_3)
-    print(df3.head())
+    df3.drop_duplicates(inplace=True)
     print(df3.equals(df1))
+
+    df1['datetime'] = pd.to_datetime(df1['violation_year'].astype(str) + '-' + df1['violation_month'].astype(str) + '-01')
+    df1 = df1.sort_values(by=['license_id', 'datetime']).reset_index(drop=True)
+    print(df1.head(10))

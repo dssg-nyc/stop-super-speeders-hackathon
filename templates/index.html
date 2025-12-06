@@ -237,6 +237,83 @@
             position: absolute;
             left: 0;
         }
+        
+        .resource-link-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .resource-link-box a {
+            color: #A6192E;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .resource-link-box a:hover {
+            color: #54585A;
+            gap: 12px;
+        }
+        
+        /* Loading Animation Styles */
+        .loading-dots {
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            display: inline-block;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes blink {
+            0%, 20%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        .hourglass {
+            display: inline-block;
+            margin-right: 8px;
+            animation: flip 2s ease-in-out infinite;
+        }
+        
+        @keyframes flip {
+            0% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(90deg);
+            }
+            50% {
+                transform: rotate(180deg);
+            }
+            75% {
+                transform: rotate(270deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -284,6 +361,12 @@
                 <li><strong>11+ speed-related points</strong> in 18 months</li>
             </ul>
         </div>
+        
+        <div class="resource-link-box">
+            <a href="/resources">
+                📚 Learn Why This Program Matters →
+            </a>
+        </div>
     </div>
     
     <script>
@@ -327,7 +410,7 @@
         // Handle form submission
         uploadForm.addEventListener('submit', function(e) {
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Processing...';
+            submitBtn.innerHTML = '<span class="hourglass">⏳</span>Processing<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>';
         });
     </script>
 </body>

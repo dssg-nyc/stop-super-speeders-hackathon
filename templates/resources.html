@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - SAFENY Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 50px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #A6192E;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #2d3748;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #A6192E;
+        }
+        
+        .section p {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .resource-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+        
+        .resource-card:hover {
+            border-color: #A6192E;
+            box-shadow: 0 8px 20px rgba(166, 25, 46, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .resource-logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .resource-logo img {
+            max-width: 300px;
+            height: auto;
+        }
+        
+        .resource-card h3 {
+            color: #2d3748;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .resource-card p {
+            margin-bottom: 20px;
+        }
+        
+        .resource-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(166, 25, 46, 0.3);
+        }
+        
+        .resource-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(166, 25, 46, 0.5);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #A6192E 0%, #54585A 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .back-button {
+            display: inline-block;
+            color: #A6192E;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: 2px solid #A6192E;
+            border-radius: 10px;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+        
+        .back-button:hover {
+            background: #A6192E;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">← Back to Portal</a>
+        
+        <div class="header">
+            <div class="badge">🚔 Why This Matters</div>
+            <h1>SAFENY Program Resources</h1>
+            <p class="subtitle">
+                Understanding the critical importance of traffic safety and preventing speed-related fatalities
+            </p>
+        </div>
+        
+        <div class="section">
+            <h2>The Problem</h2>
+            <p>
+                Traffic violence is a leading cause of death in New York. Speeding is a major contributing factor 
+                to severe crashes and fatalities on our streets. Super speeders—drivers with repeated speed violations—
+                pose a significant risk to public safety.
+            </p>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">250+</div>
+                    <div class="stat-label">Traffic deaths in NYC annually</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">30%</div>
+                    <div class="stat-label">Crashes involving speeding</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">Vision Zero</div>
+                    <div class="stat-label">Goal: Zero traffic deaths</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>The Solution</h2>
+            <p>
+                The SAFENY program uses data-driven detection to identify repeat speed offenders who meet 
+                specific thresholds. These drivers are required to install Intelligent Speed Assistance (ISA) 
+                devices that prevent their vehicles from exceeding posted speed limits.
+            </p>
+            <p>
+                <strong>Detection Criteria:</strong>
+            </p>
+            <ul style="color: #4a5568; font-size: 16px; line-height: 1.8; margin-left: 30px; margin-bottom: 15px;">
+                <li>16 or more speed camera tickets in 12 months, OR</li>
+                <li>11 or more speed-related points in 18 months</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Community Partners & Resources</h2>
+            
+            <div class="resource-card">
+                <div class="resource-logo">
+                    <img src="https://images.squarespace-cdn.com/content/v1/5cab9d9b65a707a9b1f52cc9/1598543218168-U3BE0CHQJY61GC7VER7A/S.A.F.E.+Logo.png?format=1500w" 
+                         alt="Streets Are For Everyone Logo"
+                         onerror="this.style.display='none'">
+                </div>
+                
+                <h3>Streets Are For Everyone (S.A.F.E.)</h3>
+                <p>
+                    S.A.F.E. is a grassroots organization dedicated to making New York City streets safer for all users—
+                    pedestrians, cyclists, and drivers alike. They advocate for evidence-based traffic safety policies, 
+                    infrastructure improvements, and accountability for dangerous driving.
+                </p>
+                <p>
+                    Their mission aligns with Vision Zero: the belief that no loss of life on our streets is acceptable 
+                    and that traffic deaths are preventable through systemic changes.
+                </p>
+                
+                <a href="https://www.streetsareforeveryone.org/?gad_source=1&gad_campaignid=22041628981&gbraid=0AAAAADQO_jiuVhjtXyx7cEOuRc0vBeibs&gclid=CjwKCAiAxc_JBhA2EiwAFVs7XDbq-EyNg8K6MO6zBxWC_8UXCFAGI27Iy6pbiVS-HFCIIXgYdWkkgBoCcLMQAvD_BwE" 
+                   target="_blank" 
+                   class="resource-link">
+                    Visit S.A.F.E. →
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <h3>Beta NYC</h3>
+                <p>
+                    Beta NYC is a nonprofit organization that partners with the City of New York to design and test 
+                    innovative solutions to public challenges. They focus on leveraging data, technology, and research 
+                    to improve city services and outcomes.
+                </p>
+                <p>
+                    Their work includes collaborating on traffic safety initiatives, analyzing datasets to identify 
+                    patterns in violations, and developing evidence-based interventions that actually work. Beta NYC 
+                    helps bridge the gap between data and policy implementation.
+                </p>
+                
+                <a href="https://www.beta.nyc/" 
+                   target="_blank" 
+                   class="resource-link">
+                    Learn More About Beta NYC →
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <h3>NYC Data Science for Social Good (NYC-DSSG)</h3>
+                <p>
+                    NYC-DSSG is an initiative that brings together data scientists, technologists, and nonprofit leaders 
+                    to tackle critical social challenges through data-driven approaches. They work on projects that 
+                    directly impact vulnerable populations and community safety.
+                </p>
+                <p>
+                    Their mission includes traffic safety, public health, and criminal justice. By combining advanced 
+                    analytics with domain expertise, NYC-DSSG helps organizations use data responsibly to create 
+                    measurable social impact.
+                </p>
+                
+                <a href="https://www.nyc-dssg.org/" 
+                   target="_blank" 
+                   class="resource-link">
+                    Explore NYC-DSSG →
+                </a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>How You Can Help</h2>
+            <p>
+                Traffic safety requires collective action. By supporting organizations like S.A.F.E., Beta NYC, and 
+                NYC-DSSG, advocating for safer street design, and holding dangerous drivers accountable, we can work 
+                toward a future where everyone can travel safely on New York City streets.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

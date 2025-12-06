@@ -8,6 +8,10 @@
 -- Returns drivers (license_id) that NEWLY crossed the 11+ points threshold
 -- when test_data is added to historical_data.
 --
+-- IMPORTANT: Uses the SAME reference date for both baseline and combined
+-- calculations to ensure we identify drivers who crossed the threshold
+-- specifically due to violations in the new test data.
+--
 -- Threshold: 11+ violation points within trailing 24 months
 -- Reference: NY Bill A.2299/S.4045
 -- ============================================================================
@@ -35,7 +39,7 @@ WITH combined_data AS (
 
 -- Deduplicate by unique violation (same violation should only count once)
 -- A violation is unique by: license_id + year + month + violation_code
-deduplicated AS (
+combined_deduped AS (
     SELECT DISTINCT ON (license_id, violation_year, violation_month, violation_code)
         license_id,
         violation_year,
@@ -48,14 +52,14 @@ deduplicated AS (
     ORDER BY license_id, violation_year, violation_month, violation_code
 ),
 
--- Reference month: use the most recent violation month as the "as of" date
--- Using year*12 + month for accurate month arithmetic
-reference_month_combined AS (
-    SELECT MAX(violation_year * 12 + violation_month) as ref_month FROM deduplicated
+-- Reference month: use the most recent violation month from COMBINED data
+-- This is the "as of" date for our analysis
+reference_month AS (
+    SELECT MAX(violation_year * 12 + violation_month) as ref_month FROM combined_deduped
 ),
 
 -- CURRENT violators (historical + test data)
--- Sum points in trailing 24-month window
+-- Sum points in trailing 24-month window from the reference date
 current_violators AS (
     SELECT
         d.license_id,
@@ -65,13 +69,13 @@ current_violators AS (
         MIN(d.violation_year * 100 + d.violation_month) as first_violation_ym,
         MAX(d.violation_year * 100 + d.violation_month) as last_violation_ym,
         r.ref_month as reference_month
-    FROM deduplicated d, reference_month_combined r
+    FROM combined_deduped d, reference_month r
     WHERE (d.violation_year * 12 + d.violation_month) >= r.ref_month - 24
     GROUP BY d.license_id, r.ref_month
     HAVING SUM(d.points) >= 11
 ),
 
--- Deduplicate historical
+-- Deduplicate historical data only
 historical_deduped AS (
     SELECT DISTINCT ON (license_id, violation_year, violation_month, violation_code)
         license_id,
@@ -85,23 +89,20 @@ historical_deduped AS (
     ORDER BY license_id, violation_year, violation_month, violation_code
 ),
 
--- BASELINE reference month (historical only)
-reference_month_historical AS (
-    SELECT MAX(violation_year * 12 + violation_month) as ref_month FROM historical_deduped
-),
-
--- BASELINE violators (historical only - who was already over threshold)
+-- BASELINE violators (historical only, but using SAME reference date)
+-- This ensures we compare the same 24-month window
 baseline_violators AS (
     SELECT
-        h.license_id
-    FROM historical_deduped h, reference_month_historical r
+        h.license_id,
+        SUM(h.points) as total_points
+    FROM historical_deduped h, reference_month r
     WHERE (h.violation_year * 12 + h.violation_month) >= r.ref_month - 24
     GROUP BY h.license_id
     HAVING SUM(h.points) >= 11
 ),
 
 -- NEW violators = current - baseline
--- These are drivers that crossed the threshold due to new test data
+-- These are drivers that crossed the threshold specifically due to new test data
 new_violators AS (
     SELECT
         c.license_id,

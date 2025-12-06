@@ -8,6 +8,10 @@
 -- Returns plates that NEWLY crossed the 16+ ticket threshold when
 -- test_data is added to historical_data.
 --
+-- IMPORTANT: Uses the SAME reference date for both baseline and combined
+-- calculations to ensure we identify plates that crossed the threshold
+-- specifically due to tickets in the new test data.
+--
 -- Threshold: 16+ speed camera tickets within trailing 12 months
 -- Reference: NY Bill A.2299/S.4045
 -- ============================================================================
@@ -30,7 +34,7 @@ WITH combined_data AS (
 ),
 
 -- Deduplicate by summons_number (same ticket should only count once)
-deduplicated AS (
+combined_deduped AS (
     SELECT DISTINCT ON (summons_number)
         issue_date,
         plate,
@@ -41,13 +45,14 @@ deduplicated AS (
     ORDER BY summons_number, issue_date DESC
 ),
 
--- Reference date: use the most recent ticket date as the "as of" date
-reference_date_combined AS (
-    SELECT MAX(issue_date) as ref_date FROM deduplicated
+-- Reference date: use the most recent ticket date from COMBINED data
+-- This is the "as of" date for our analysis
+reference_date AS (
+    SELECT MAX(issue_date) as ref_date FROM combined_deduped
 ),
 
 -- CURRENT violators (historical + test data)
--- Count tickets in trailing 12-month window
+-- Count tickets in trailing 12-month window from the reference date
 current_violators AS (
     SELECT
         d.plate,
@@ -56,52 +61,38 @@ current_violators AS (
         MIN(d.issue_date) as first_violation,
         MAX(d.issue_date) as last_violation,
         r.ref_date as reference_date
-    FROM deduplicated d, reference_date_combined r
+    FROM combined_deduped d, reference_date r
     WHERE d.issue_date >= r.ref_date - INTERVAL '12 months'
     GROUP BY d.plate, d.state, r.ref_date
     HAVING COUNT(*) >= 16
 ),
 
--- Normalize historical data
-historical_normalized AS (
-    SELECT
+-- Normalize and deduplicate historical data only
+historical_deduped AS (
+    SELECT DISTINCT ON (summons_number)
         issue_date,
         UPPER(plate) as plate,
         summons_number,
         state
     FROM historical_data
     WHERE summons_number IS NOT NULL
-),
-
--- Deduplicate historical
-historical_deduped AS (
-    SELECT DISTINCT ON (summons_number)
-        issue_date,
-        plate,
-        summons_number,
-        state
-    FROM historical_normalized
     ORDER BY summons_number, issue_date DESC
 ),
 
--- BASELINE reference date (historical only)
-reference_date_historical AS (
-    SELECT MAX(issue_date) as ref_date FROM historical_deduped
-),
-
--- BASELINE violators (historical only - who was already over threshold)
+-- BASELINE violators (historical only, but using SAME reference date)
+-- This ensures we compare the same 12-month window
 baseline_violators AS (
     SELECT
         h.plate,
         h.state
-    FROM historical_deduped h, reference_date_historical r
+    FROM historical_deduped h, reference_date r
     WHERE h.issue_date >= r.ref_date - INTERVAL '12 months'
     GROUP BY h.plate, h.state
     HAVING COUNT(*) >= 16
 ),
 
 -- NEW violators = current - baseline
--- These are plates that crossed the threshold due to new test data
+-- These are plates that crossed the threshold specifically due to new test data
 new_violators AS (
     SELECT
         c.plate,

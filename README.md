@@ -12,7 +12,7 @@ The goal of this hackathon is to simulate the creation of an end to end data man
 
 ## Prerequisites: TODOs before the hackathon
 - Complete volunteer [registration](http://www.nyc-dssg.org) on DSSG-NYC website
-- Join DSSG-NYC [Slack Group](https://join.slack.com/t/nyc-dssg/shared_invite/zt-3fhzyi936-hDjiJn05j9EKY3BH9YjXgQ)
+- Join DSSG-NYC [Slack Group](https://join.slack.com/t/nyc-dssg/shared_invite/zt-3hz16bb3r-cHPu_q43IPn0eZxYO99aLw)
 - Review DSSG [Anti-harassment Policy](https://github.com/dssg/hitchhikers-guide/blob/master/sources/dssg-manual/conduct-culture-and-communications/README.md), and [ethical standards](https://dssgfellowship.org/2015/09/18/an-ethical-checklist-for-data-science/)
 - Review Family for Safe Streets Problem Statement: https://www.familiesforsafestreets.org/about
 - Review [Data Mapping Documentation and Architecture](https://docs.google.com/document/d/17KtxoxqKwIKNLGwd1zQ5g4ZBZgqkQ4PuH2VLyByReq4/edit?usp=sharing)

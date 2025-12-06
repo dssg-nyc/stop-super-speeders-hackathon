@@ -5,7 +5,7 @@ description = "Build end to end data products with open source tools"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "duckdb==1.0.0",
+    "duckdb>=1.1.0",
     "polars>=1.8.0",
     "pyarrow>=17.0.0",
     "python-dotenv>=1.0.1",

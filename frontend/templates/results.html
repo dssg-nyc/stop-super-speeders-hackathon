@@ -472,29 +472,29 @@
             <a href="/" class="back-link">← Upload Another File</a>
             <h1>🚔 Analysis Complete</h1>
             <div class="header-info">
-                File: <strong>{{ file_name }}</strong> ({{ file_type }}) | 
-                Processed: <strong>{{ timestamp }}</strong>
+                File: <strong>{{ file_name|default('uploaded file') }}</strong> ({{ file_type|default('unknown') }}) | 
+                Processed: <strong>{{ timestamp|default('now') }}</strong>
             </div>
         </div>
         
         <div class="stats-grid">
             <div class="stat-card success">
-                <div class="stat-value">{{ "{:,}".format(new_records) }}</div>
+                <div class="stat-value">{{ "{:,}".format(new_records|default(0)) }}</div>
                 <div class="stat-label">New Records Ingested</div>
             </div>
             
             <div class="stat-card danger">
-                <div class="stat-value">{{ summary.super_speeders_count }}</div>
+                <div class="stat-value">{{ summary.super_speeders_count|default(0) }}</div>
                 <div class="stat-label">Require Speed Limiting NOW</div>
             </div>
             
             <div class="stat-card warning">
-                <div class="stat-value">{{ summary.warning_drivers_count }}</div>
+                <div class="stat-value">{{ summary.warning_drivers_count|default(0) }}</div>
                 <div class="stat-label">Drivers to Watch</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">{{ "{:,}".format(warehouse_stats.total_violations) }}</div>
+                <div class="stat-value">{{ "{:,}".format(warehouse_stats.total_violations|default(0)) }}</div>
                 <div class="stat-label">Total Violations in System</div>
             </div>
         </div>
@@ -504,11 +504,11 @@
             <div class="tab-navigation">
                 <button class="tab-button active" onclick="switchTab(event, 'super-speeders')">
                     🚨 Super Speeders
-                    <span class="tab-badge">{{ summary.super_speeders_count }}</span>
+                    <span class="tab-badge">{{ summary.super_speeders_count|default(0) }}</span>
                 </button>
                 <button class="tab-button" onclick="switchTab(event, 'warning-drivers')">
                     ⚠️ Warning Drivers
-                    <span class="tab-badge">{{ summary.warning_drivers_count }}</span>
+                    <span class="tab-badge">{{ summary.warning_drivers_count|default(0) }}</span>
                 </button>
                 <button class="tab-button" onclick="switchTab(event, 'analytics')">
                     📊 Analytics & Summary
@@ -520,7 +520,7 @@
                 <div class="section-header">
                     <div class="section-title">
                         🚨 Drivers Who Require Speed Limiting Now
-                        <span class="badge badge-danger">{{ summary.super_speeders_count }} DRIVERS</span>
+                        <span class="badge badge-danger">{{ summary.super_speeders_count|default(0) }} DRIVERS</span>
                     </div>
                 </div>
                 
@@ -581,7 +581,6 @@
                 <div class="empty-state-subtext">No drivers currently meet the threshold requirements</div>
             </div>
             {% endif %}
-                </div>
             </div>
             
             <!-- Tab 2: Warning Drivers -->
@@ -589,7 +588,7 @@
                 <div class="section-header">
                     <div class="section-title">
                         ⚠️ Drivers to Watch (Warning Band)
-                        <span class="badge badge-warning">{{ summary.warning_drivers_count }} DRIVERS</span>
+                        <span class="badge badge-warning">{{ summary.warning_drivers_count|default(0) }} DRIVERS</span>
                     </div>
                 </div>
                 
@@ -650,7 +649,6 @@
                 <div class="empty-state-subtext">No drivers are currently close to the thresholds</div>
             </div>
             {% endif %}
-                </div>
             </div>
             
             <!-- Tab 3: Analytics & Summary -->
@@ -703,8 +701,9 @@
                                     <span>{{ "{:,}".format(warehouse_stats.camera_violations) }}</span>
                                 </div>
                                 <div class="bar-background">
-                                    <div class="bar-fill" style="width: {{ (warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%">
-                                        {{ "%.1f"|format((warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
+                                    {% set camera_pct = (warehouse_stats.camera_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 %}
+                                    <div class="bar-fill" style="width: {{ camera_pct|round(1) }}%">
+                                        {{ "%.1f"|format(camera_pct) }}%
                                     </div>
                                 </div>
                             </div>
@@ -715,8 +714,9 @@
                                     <span>{{ "{:,}".format(warehouse_stats.officer_violations) }}</span>
                                 </div>
                                 <div class="bar-background">
-                                    <div class="bar-fill" style="width: {{ (warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 }}%; background: linear-gradient(90deg, #54585A 0%, #A6192E 100%);">
-                                        {{ "%.1f"|format((warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0) }}%
+                                    {% set officer_pct = (warehouse_stats.officer_violations / (warehouse_stats.camera_violations + warehouse_stats.officer_violations) * 100) if (warehouse_stats.camera_violations + warehouse_stats.officer_violations) > 0 else 0 %}
+                                    <div class="bar-fill" style="width: {{ officer_pct|round(1) }}%; background: linear-gradient(90deg, #54585A 0%, #A6192E 100%)">
+                                        {{ "%.1f"|format(officer_pct) }}%
                                     </div>
                                 </div>
                             </div>
@@ -754,11 +754,12 @@
                         <div class="bar-item">
                             <div class="bar-label">
                                 <span>🚨 High Risk (Require Speed Limiting)</span>
-                                <span>{{ "{:,}".format(summary.super_speeders_count) }}</span>
+                                <span>{{ "{:,}".format(summary.super_speeders_count|default(0)) }}</span>
                             </div>
                             <div class="bar-background">
-                                <div class="bar-fill" style="width: {{ (summary.super_speeders_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 }}%; background: #A6192E;">
-                                    {{ "%.2f"|format((summary.super_speeders_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%
+                                {% set risk_pct = (summary.super_speeders_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 %}
+                                <div class="bar-fill" style="width: {{ risk_pct|round(2) }}%; background: #A6192E;">
+                                    {{ "%.2f"|format(risk_pct) }}%
                                 </div>
                             </div>
                         </div>
@@ -766,11 +767,12 @@
                         <div class="bar-item">
                             <div class="bar-label">
                                 <span>⚠️ Warning Band (Close to Threshold)</span>
-                                <span>{{ "{:,}".format(summary.warning_drivers_count) }}</span>
+                                <span>{{ "{:,}".format(summary.warning_drivers_count|default(0)) }}</span>
                             </div>
                             <div class="bar-background">
-                                <div class="bar-fill" style="width: {{ (summary.warning_drivers_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 }}%; background: #ed8936;">
-                                    {{ "%.2f"|format((summary.warning_drivers_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%
+                                {% set warning_pct = (summary.warning_drivers_count / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 %}
+                                <div class="bar-fill" style="width: {{ warning_pct|round(2) }}%; background: #ed8936;">
+                                    {{ "%.2f"|format(warning_pct) }}%
                                 </div>
                             </div>
                         </div>
@@ -778,11 +780,12 @@
                         <div class="bar-item">
                             <div class="bar-label">
                                 <span>✅ Compliant Drivers</span>
-                                <span>{{ "{:,}".format(warehouse_stats.unique_drivers - summary.super_speeders_count - summary.warning_drivers_count) }}</span>
+                                <span>{{ "{:,}".format(warehouse_stats.unique_drivers|default(0) - summary.super_speeders_count|default(0) - summary.warning_drivers_count|default(0)) }}</span>
                             </div>
                             <div class="bar-background">
-                                <div class="bar-fill" style="width: {{ ((warehouse_stats.unique_drivers - summary.super_speeders_count - summary.warning_drivers_count) / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 }}%; background: #48bb78;">
-                                    {{ "%.2f"|format(((warehouse_stats.unique_drivers - summary.super_speeders_count - summary.warning_drivers_count) / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0) }}%
+                                {% set compliant_pct = ((warehouse_stats.unique_drivers - summary.super_speeders_count - summary.warning_drivers_count) / warehouse_stats.unique_drivers * 100) if warehouse_stats.unique_drivers > 0 else 0 %}
+                                <div class="bar-fill" style="width: {{ compliant_pct|round(2) }}%; background: #48bb78;">
+                                    {{ "%.2f"|format(compliant_pct) }}%
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,0 @@
-print("Hi Shrikar Swami - Abhiram Kandadi")
-print("Hi Dylan Mehra")
-print("Srinidhi Palanichamy")
-print("Raghav Nanavati")
-print("Akash Lal")
-print ("Daksh Aggarwal")

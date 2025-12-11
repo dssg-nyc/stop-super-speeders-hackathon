@@ -32,16 +32,19 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI app
 app = FastAPI(title="SAFENY Super Speeder Detection System")
 
-# Setup paths
+# Setup paths (project root → backend/frontend/data)
 BASE_DIR = Path(__file__).parent
-TEMPLATES_DIR = BASE_DIR / "templates"
-DATA_DIR = BASE_DIR / "data"
-UPLOADS_DIR = DATA_DIR / "uploads"
-CLEANED_DIR = DATA_DIR / "opendata" / "cleaned"
+ROOT_DIR = BASE_DIR.parent
+TEMPLATES_DIR = ROOT_DIR / "frontend" / "templates"
+DATA_DIR = ROOT_DIR / "data"
+RAW_DATA_DIR = DATA_DIR / "raw"
+UPLOADS_DIR = RAW_DATA_DIR / "uploads"
+CLEANED_DIR = DATA_DIR / "cleaned"
 DUCKDB_PATH = DATA_DIR / "duckdb" / "test.duckdb"
 SCHEMA_FILE = BASE_DIR / "sql" / "01_schema.sql"
 
 # Create necessary directories
+RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 CLEANED_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -81,6 +84,17 @@ async def upload_and_process(
         file_type: Either 'speed_camera' or 'traffic_violations'
     """
     try:
+        # Validate filename exists
+        if not file.filename:
+            return templates.TemplateResponse(
+                "error.html",
+                {
+                    "request": request,
+                    "error_title": "Invalid File",
+                    "error_message": "Please upload a file with a valid filename."
+                }
+            )
+        
         # Validate file type
         if not file.filename.endswith('.csv'):
             return templates.TemplateResponse(
